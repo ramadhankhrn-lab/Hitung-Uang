@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Catatan Keuangan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .box {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        .total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .saldo {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📊 Catatan Pemasukan & Pengeluaran</h2>
+
+<div class="box">
+    <h3>➕ Tambah Pemasukan</h3>
+    <input type="text" id="produkMasuk" placeholder="Nama Produk">
+    <input type="number" id="hargaMasuk" placeholder="Harga (Rp)">
+    <button onclick="tambahPemasukan()">Tambah Pemasukan</button>
+</div>
+
+<div class="box">
+    <h3>➖ Tambah Pengeluaran</h3>
+    <input type="text" id="produkKeluar" placeholder="Nama Pengeluaran">
+    <input type="number" id="hargaKeluar" placeholder="Harga (Rp)">
+    <button onclick="tambahPengeluaran()">Tambah Pengeluaran</button>
+</div>
+
+<div class="box">
+    <h3>📥 Pemasukan</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Produk</th>
+                <th>Harga</th>
+            </tr>
+        </thead>
+        <tbody id="listMasuk"></tbody>
+    </table>
+    <div class="total">Total Pemasukan: <span id="totalMasuk">Rp 0</span></div>
+</div>
+
+<div class="box">
+    <h3>📤 Pengeluaran</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Pengeluaran</th>
+                <th>Harga</th>
+            </tr>
+        </thead>
+        <tbody id="listKeluar"></tbody>
+    </table>
+    <div class="total">Total Pengeluaran: <span id="totalKeluar">Rp 0</span></div>
+</div>
+
+<div class="box">
+    <div class="saldo">
+        💰 Saldo Akhir: <span id="saldo">Rp 0</span>
+    </div>
+</div>
+
+<script>
+    let totalMasuk = 0;
+    let totalKeluar = 0;
+
+    function formatRupiah(angka) {
+        return "Rp " + angka.toLocaleString("id-ID");
+    }
+
+    function tambahPemasukan() {
+        let produk = document.getElementById("produkMasuk").value;
+        let harga = parseInt(document.getElementById("hargaMasuk").value);
+
+        if (produk === "" || isNaN(harga)) {
+            alert("Isi nama produk dan harga!");
+            return;
+        }
+
+        totalMasuk += harga;
+
+        document.getElementById("listMasuk").innerHTML += `
+            <tr>
+                <td>${produk}</td>
+                <td>${formatRupiah(harga)}</td>
+            </tr>
+        `;
+
+        document.getElementById("totalMasuk").innerText = formatRupiah(totalMasuk);
+        hitungSaldo();
+
+        document.getElementById("produkMasuk").value = "";
+        document.getElementById("hargaMasuk").value = "";
+    }
+
+    function tambahPengeluaran() {
+        let produk = document.getElementById("produkKeluar").value;
+        let harga = parseInt(document.getElementById("hargaKeluar").value);
+
+        if (produk === "" || isNaN(harga)) {
+            alert("Isi nama pengeluaran dan harga!");
+            return;
+        }
+
+        totalKeluar += harga;
+
+        document.getElementById("listKeluar").innerHTML += `
+            <tr>
+                <td>${produk}</td>
+                <td>${formatRupiah(harga)}</td>
+            </tr>
+        `;
+
+        document.getElementById("totalKeluar").innerText = formatRupiah(totalKeluar);
+        hitungSaldo();
+
+        document.getElementById("produkKeluar").value = "";
+        document.getElementById("hargaKeluar").value = "";
+    }
+
+    function hitungSaldo() {
+        let saldo = totalMasuk - totalKeluar;
+        document.getElementById("saldo").innerText = formatRupiah(saldo);
+    }
+</script>
+
+</body>
+</html>
