@@ -2,261 +2,175 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Catatan Keuangan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keuangan Jualan</title>
 
 <style>
-*{box-sizing:border-box}
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
+*{box-sizing:border-box;font-family:Arial,sans-serif}
 body{
-    background:url("https://files.catbox.moe/t234u7.jpg") no-repeat center;
-    background-size:cover;
+    margin:0;
+    height:100vh;
+    background:url("https://files.catbox.moe/t234u7.jpg") center/cover no-repeat;
 }
-
 .app{
-    width:100%;
-    height:100%;
+    max-width:430px;
+    height:100vh;
+    margin:auto;
     background:rgba(0,0,0,.65);
-    backdrop-filter:blur(6px);
+    color:#fff;
+    padding:15px;
     display:flex;
     flex-direction:column;
-    color:#fff;
 }
-
-.header{
-    padding:15px;
+h2{text-align:center}
+.input{display:flex;gap:8px;margin-bottom:10px}
+.input input{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+}
+.btn-group{display:flex;gap:8px;margin-bottom:10px}
+button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    font-size:15px;
+}
+.income-btn{background:#28a745}
+.expense-btn{background:#ffc107;color:#000}
+.reset-btn{background:#dc3545;margin-top:auto}
+.balance{
     text-align:center;
     font-size:20px;
-    font-weight:bold;
-    border-bottom:1px solid rgba(255,255,255,.2);
-}
-
-/* INPUT */
-.form{
-    padding:10px;
-    display:flex;
-    gap:6px;
-}
-
-.form input{
-    flex:1;
-    padding:10px;
-    border:none;
-    border-radius:6px;
-    font-size:14px;
-}
-
-/* BUTTON TAMBAH */
-.btn-group{
-    display:flex;
-    gap:8px;
-    padding:0 10px 10px;
-}
-
-.btn-income{
-    flex:1;
-    padding:12px;
-    background:#28a745;
-    border:none;
-    border-radius:6px;
-    color:#fff;
+    margin-bottom:10px;
     font-weight:bold;
 }
-
-.btn-expense{
-    flex:1;
-    padding:12px;
-    background:#dc3545;
-    border:none;
-    border-radius:6px;
-    color:#fff;
-    font-weight:bold;
-}
-
-/* SECTION */
-.section{
-    flex:1;
-    overflow-y:auto;
-    padding:10px;
-}
-
-.section h3{
-    margin:5px 0 10px;
-    font-size:16px;
-}
-
-.income-title{color:#7CFF9B}
-.expense-title{color:#FF9B9B}
-
-/* ITEM */
+.section{flex:1;overflow-y:auto;margin-bottom:10px}
+.section h3{margin:5px 0}
 .item{
     background:rgba(255,255,255,.1);
     padding:10px;
-    border-radius:6px;
-    margin-bottom:8px;
-}
-
-.item-header{
+    border-radius:8px;
     display:flex;
     justify-content:space-between;
-    font-size:14px;
+    margin-bottom:6px;
 }
-
-.controls{
-    display:flex;
-    gap:6px;
-    margin-top:6px;
-}
-
-.controls button{
-    flex:1;
-    border:none;
-    border-radius:6px;
-    padding:6px;
-    font-weight:bold;
-}
-
-.plus{background:#28a745;color:#fff}
-.minus{background:#dc3545;color:#fff}
-.delete{background:#555;color:#fff}
-
-/* RESET */
-.reset{
-    margin:10px;
-    padding:12px;
-    background:#b02a37;
-    border:none;
-    border-radius:6px;
-    font-weight:bold;
-    color:#fff;
-}
-
-/* SALDO */
-.footer{
-    padding:15px;
+.delete{
+    background:#ff4444;
+    width:24px;height:24px;
+    border-radius:50%;
     text-align:center;
-    font-size:18px;
-    font-weight:bold;
-    border-top:1px solid rgba(255,255,255,.2);
+    line-height:24px;
+    cursor:pointer;
 }
 </style>
 </head>
 
 <body>
-
 <div class="app">
-    <div class="header">💰 Catatan Keuangan</div>
 
-    <div class="form">
-        <input id="desc" placeholder="Keterangan">
-        <input id="amount" type="number" placeholder="Nominal">
-    </div>
+<h2>Catatan Keuangan</h2>
+<div class="balance" id="saldo">Saldo: Rp 0</div>
 
-    <div class="btn-group">
-        <button class="btn-income" onclick="tambah('income')">+ Pemasukan</button>
-        <button class="btn-expense" onclick="tambah('expense')">+ Pengeluaran</button>
-    </div>
+<div class="input">
+    <input id="desc" placeholder="Keterangan">
+    <input id="amount" type="number" placeholder="Nominal">
+</div>
 
-    <!-- PEMASUKAN -->
-    <div class="section" id="incomeList">
-        <h3 class="income-title">⬆ PEMASUKAN</h3>
-    </div>
+<div class="btn-group">
+    <button class="income-btn" onclick="addIncome()">+ Pemasukan</button>
+    <button class="expense-btn" onclick="addExpense()">- Pengeluaran</button>
+</div>
 
-    <!-- PENGELUARAN -->
-    <div class="section" id="expenseList">
-        <h3 class="expense-title">⬇ PENGELUARAN</h3>
-    </div>
+<div class="section">
+    <h3>📥 Pemasukan</h3>
+    <div id="incomeList"></div>
+</div>
 
-    <button class="reset" onclick="resetSaldo()">RESET SALDO</button>
+<div class="section">
+    <h3>📤 Pengeluaran</h3>
+    <div id="expenseList"></div>
+</div>
 
-    <div class="footer" id="saldo">Saldo: Rp 0</div>
+<button class="reset-btn" onclick="resetSaldo()">RESET SALDO</button>
+
 </div>
 
 <script>
-let data=[];
+/* ===== LOCAL STORAGE ===== */
+let incomes = JSON.parse(localStorage.getItem("incomes")) || [];
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
-function render(){
-    const incomeList=document.getElementById("incomeList");
-    const expenseList=document.getElementById("expenseList");
-    const saldoEl=document.getElementById("saldo");
+function saveData(){
+    localStorage.setItem("incomes", JSON.stringify(incomes));
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+}
 
-    incomeList.innerHTML='<h3 class="income-title">⬆ PEMASUKAN</h3>';
-    expenseList.innerHTML='<h3 class="expense-title">⬇ PENGELUARAN</h3>';
+/* ===== UPDATE UI ===== */
+function updateUI(){
+    let saldo = 0;
+    incomeList.innerHTML = "";
+    expenseList.innerHTML = "";
 
-    let saldo=0;
-
-    data.forEach((d,i)=>{
-        saldo+= d.type==="income" ? d.amount : -d.amount;
-
-        const div=document.createElement("div");
-        div.className="item";
-        div.innerHTML=`
-            <div class="item-header">
-                <span>${d.desc}</span>
-                <span>${d.type==="income" ? "+" : "-"}Rp ${d.amount.toLocaleString()}</span>
-            </div>
-            <div class="controls">
-                <button class="plus" onclick="ubah(${i},true)">+</button>
-                <button class="minus" onclick="ubah(${i},false)">−</button>
-                <button class="delete" onclick="hapus(${i})">✕</button>
-            </div>
-        `;
-
-        if(d.type==="income") incomeList.appendChild(div);
-        else expenseList.appendChild(div);
+    incomes.forEach((i,idx)=>{
+        saldo += i.amount;
+        incomeList.innerHTML += `
+        <div class="item">
+            <span>${i.desc} +Rp ${i.amount.toLocaleString()}</span>
+            <div class="delete" onclick="delIncome(${idx})">×</div>
+        </div>`;
     });
 
-    saldoEl.innerText="Saldo: Rp "+saldo.toLocaleString();
+    expenses.forEach((e,idx)=>{
+        saldo -= e.amount;
+        expenseList.innerHTML += `
+        <div class="item">
+            <span>${e.desc} -Rp ${e.amount.toLocaleString()}</span>
+            <div class="delete" onclick="delExpense(${idx})">×</div>
+        </div>`;
+    });
+
+    saldo.innerText = "Saldo: Rp " + saldo.toLocaleString();
+    saveData();
 }
 
-function tambah(type){
-    const desc=document.getElementById("desc").value.trim();
-    const amount=parseInt(document.getElementById("amount").value);
-
-    if(!desc||isNaN(amount)||amount<=0){
-        alert("Isi data yang bener 😭");
-        return;
-    }
-
-    data.push({desc,amount,type});
-    document.getElementById("desc").value="";
-    document.getElementById("amount").value="";
-    render();
+/* ===== ACTIONS ===== */
+function addIncome(){
+    if(!desc.value || amount.value<=0) return alert("Isi yang bener!");
+    incomes.push({desc:desc.value, amount:+amount.value});
+    desc.value=""; amount.value="";
+    updateUI();
 }
 
-function ubah(i,plus){
-    const n=parseInt(prompt("Masukkan nominal:"));
-    if(isNaN(n)||n<=0) return;
-
-    if(plus) data[i].amount+=n;
-    else{
-        data[i].amount-=n;
-        if(data[i].amount<=0) data.splice(i,1);
-    }
-    render();
+function addExpense(){
+    if(!desc.value || amount.value<=0) return alert("Isi yang bener!");
+    expenses.push({desc:desc.value, amount:+amount.value});
+    desc.value=""; amount.value="";
+    updateUI();
 }
 
-function hapus(i){
-    if(confirm("Hapus data ini?")){
-        data.splice(i,1);
-        render();
-    }
+function delIncome(i){
+    incomes.splice(i,1);
+    updateUI();
+}
+
+function delExpense(i){
+    expenses.splice(i,1);
+    updateUI();
 }
 
 function resetSaldo(){
     if(confirm("Yakin reset semua data?")){
-        data=[];
-        render();
+        incomes=[]; expenses=[];
+        updateUI();
     }
 }
 
-render();
+/* LOAD DATA */
+updateUI();
 </script>
 
 </body>
