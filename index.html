@@ -2,17 +2,17 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Keuangan Modern</title>
+<title>Catatan Keuangan</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root{
   --glass: rgba(255,255,255,.15);
   --border: rgba(255,255,255,.35);
-  --text: #fff;
+  --text:#fff;
   --green:#22c55e;
-  --red:#ef4444;
   --orange:#f59e0b;
+  --red:#ef4444;
 }
 
 *{box-sizing:border-box}
@@ -70,21 +70,20 @@ table{
   font-size:14px;
 }
 
-td{
+th,td{
   padding:8px;
   border-bottom:1px solid var(--border);
+}
+
+.date{
+  font-weight:bold;
+  margin-top:15px;
 }
 
 .saldo{
   font-size:26px;
   font-weight:bold;
   text-align:center;
-}
-
-.date{
-  margin-top:15px;
-  font-weight:bold;
-  opacity:.9;
 }
 </style>
 </head>
@@ -98,14 +97,14 @@ td{
 <h3>➕ Pemasukan</h3>
 <input id="produkMasuk" placeholder="Nama Produk">
 <input id="hargaMasuk" type="number" placeholder="Harga (Rp)">
-<button class="btn-green" onclick="tambahPemasukan()">Tambah</button>
+<button class="btn-green" onclick="tambah('pemasukan')">Tambah</button>
 </div>
 
 <div class="card">
 <h3>➖ Pengeluaran</h3>
 <input id="produkKeluar" placeholder="Nama Pengeluaran">
 <input id="hargaKeluar" type="number" placeholder="Harga (Rp)">
-<button class="btn-orange" onclick="tambahPengeluaran()">Tambah</button>
+<button class="btn-orange" onclick="tambah('pengeluaran')">Tambah</button>
 </div>
 
 <div class="card">
@@ -121,51 +120,62 @@ td{
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("keuangan")) || {};
+let keuangan = JSON.parse(localStorage.getItem("keuangan")) || {};
 
-const today = new Date().toLocaleDateString("id-ID");
 const rupiah = n => "Rp " + n.toLocaleString("id-ID");
 
+function getToday(){
+  return new Date().toLocaleDateString("id-ID");
+}
+
 function simpan(){
-  localStorage.setItem("keuangan", JSON.stringify(data));
+  localStorage.setItem("keuangan", JSON.stringify(keuangan));
 }
 
-function tambahPemasukan(){
-  tambahData("pemasukan", produkMasuk.value, hargaMasuk.value);
-  produkMasuk.value=""; hargaMasuk.value="";
-}
+function tambah(jenis){
+  const produk = jenis==="pemasukan" ? produkMasuk.value : produkKeluar.value;
+  const harga  = jenis==="pemasukan" ? hargaMasuk.value  : hargaKeluar.value;
+  const h = parseInt(harga);
 
-function tambahPengeluaran(){
-  tambahData("pengeluaran", produkKeluar.value, hargaKeluar.value);
-  produkKeluar.value=""; hargaKeluar.value="";
-}
+  if(!produk || isNaN(h)) return alert("Isi produk & harga!");
 
-function tambahData(jenis, produk, harga){
-  harga = parseInt(harga);
-  if(!produk || isNaN(harga)) return alert("Isi data!");
+  const tgl = getToday();
+  if(!keuangan[tgl]) keuangan[tgl] = [];
 
-  if(!data[today]) data[today] = [];
-  data[today].push({jenis, produk, harga});
-  simpan(); render();
+  keuangan[tgl].push({ jenis, produk, harga:h });
+  simpan();
+  render();
+
+  if(jenis==="pemasukan"){
+    produkMasuk.value=""; hargaMasuk.value="";
+  }else{
+    produkKeluar.value=""; hargaKeluar.value="";
+  }
 }
 
 function render(){
+  history.innerHTML="";
   let saldo = 0;
-  history.innerHTML = "";
 
-  Object.keys(data).forEach(tgl=>{
-    history.innerHTML += `<div class="date">📅 ${tgl}</div><table>`;
-    data[tgl].forEach((x,i)=>{
-      saldo += x.jenis === "pemasukan" ? x.harga : -x.harga;
+  Object.keys(keuangan).forEach(tgl=>{
+    history.innerHTML += `
+      <div class="date">📅 ${tgl}</div>
+      <table>
+        <tr><th>Jenis</th><th>Produk</th><th>Harga</th><th>Aksi</th></tr>
+    `;
+
+    keuangan[tgl].forEach((x,i)=>{
+      saldo += x.jenis==="pemasukan" ? x.harga : -x.harga;
       history.innerHTML += `
         <tr>
-          <td>${x.jenis==="pemasukan" ? "➕" : "➖"} ${x.produk}</td>
-          <td style="text-align:right">${rupiah(x.harga)}</td>
-          <td style="width:60px">
-            <button class="btn-red" onclick="hapus('${tgl}',${i})">✖</button>
-          </td>
-        </tr>`;
+          <td>${x.jenis==="pemasukan"?"➕":"➖"}</td>
+          <td>${x.produk}</td>
+          <td>${rupiah(x.harga)}</td>
+          <td><button class="btn-red" onclick="hapus('${tgl}',${i})">✖</button></td>
+        </tr>
+      `;
     });
+
     history.innerHTML += `</table>`;
   });
 
@@ -174,8 +184,8 @@ function render(){
 
 function hapus(tgl,i){
   if(confirm("Hapus data ini?")){
-    data[tgl].splice(i,1);
-    if(data[tgl].length===0) delete data[tgl];
+    keuangan[tgl].splice(i,1);
+    if(keuangan[tgl].length===0) delete keuangan[tgl];
     simpan(); render();
   }
 }
@@ -183,7 +193,7 @@ function hapus(tgl,i){
 function resetSaldo(){
   if(confirm("Reset semua data?")){
     localStorage.clear();
-    data = {};
+    keuangan = {};
     render();
   }
 }
