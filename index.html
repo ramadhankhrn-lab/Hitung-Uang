@@ -37,36 +37,49 @@ body{
     border-bottom:1px solid rgba(255,255,255,.2);
 }
 
+/* INPUT */
 .form{
     padding:10px;
     display:flex;
     gap:6px;
 }
 
-.form input,.form select,.form button{
+.form input{
+    flex:1;
     padding:10px;
     border:none;
     border-radius:6px;
     font-size:14px;
 }
 
-.form input{flex:1}
-.form select{width:100px}
-.form button{
+/* BUTTON TAMBAH */
+.btn-group{
+    display:flex;
+    gap:8px;
+    padding:0 10px 10px;
+}
+
+.btn-income{
+    flex:1;
+    padding:12px;
     background:#28a745;
+    border:none;
+    border-radius:6px;
     color:#fff;
     font-weight:bold;
 }
 
-.reset{
-    margin:0 10px 10px;
-    padding:10px;
-    background:#ffc107;
+.btn-expense{
+    flex:1;
+    padding:12px;
+    background:#dc3545;
     border:none;
     border-radius:6px;
+    color:#fff;
     font-weight:bold;
 }
 
+/* LIST */
 .list{
     flex:1;
     overflow-y:auto;
@@ -98,13 +111,24 @@ body{
     border-radius:6px;
     padding:6px;
     font-weight:bold;
-    cursor:pointer;
 }
 
 .plus{background:#28a745;color:#fff}
 .minus{background:#dc3545;color:#fff}
 .delete{background:#555;color:#fff}
 
+/* RESET DI BAWAH */
+.reset{
+    margin:10px;
+    padding:12px;
+    background:#b02a37;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    color:#fff;
+}
+
+/* SALDO */
 .footer{
     padding:15px;
     text-align:center;
@@ -123,16 +147,18 @@ body{
     <div class="form">
         <input id="desc" placeholder="Keterangan">
         <input id="amount" type="number" placeholder="Nominal">
-        <select id="type">
-            <option value="income">Masuk</option>
-            <option value="expense">Keluar</option>
-        </select>
-        <button onclick="tambah()">+</button>
     </div>
 
-    <button class="reset" onclick="resetSaldo()">Reset Saldo</button>
+    <!-- TOMBOL ATAS -->
+    <div class="btn-group">
+        <button class="btn-income" onclick="tambah('income')">+ Pemasukan</button>
+        <button class="btn-expense" onclick="tambah('expense')">+ Pengeluaran</button>
+    </div>
 
     <div class="list" id="list"></div>
+
+    <!-- RESET BAWAH -->
+    <button class="reset" onclick="resetSaldo()">RESET SALDO</button>
 
     <div class="footer" id="saldo">Saldo: Rp 0</div>
 </div>
@@ -157,8 +183,8 @@ function render(){
                 <span>${d.type==="income" ? "+" : "-"}Rp ${d.amount.toLocaleString()}</span>
             </div>
             <div class="controls">
-                <button class="plus" onclick="ubah(${i}, true)">+</button>
-                <button class="minus" onclick="ubah(${i}, false)">−</button>
+                <button class="plus" onclick="ubah(${i},true)">+</button>
+                <button class="minus" onclick="ubah(${i},false)">−</button>
                 <button class="delete" onclick="hapus(${i})">✕</button>
             </div>
         `;
@@ -168,13 +194,12 @@ function render(){
     saldoEl.innerText="Saldo: Rp "+saldo.toLocaleString();
 }
 
-function tambah(){
+function tambah(type){
     const desc=document.getElementById("desc").value.trim();
     const amount=parseInt(document.getElementById("amount").value);
-    const type=document.getElementById("type").value;
 
-    if(!desc||isNaN(amount)||amount<=0){
-        alert("Isi yang bener 😭");
+    if(!desc || isNaN(amount) || amount<=0){
+        alert("Isi data yang bener 😭");
         return;
     }
 
@@ -185,13 +210,11 @@ function tambah(){
 }
 
 function ubah(i,tambah){
-    const nilai=prompt("Masukkan nominal:");
-    const n=parseInt(nilai);
+    const n=parseInt(prompt("Masukkan nominal:"));
     if(isNaN(n)||n<=0) return;
 
-    if(tambah){
-        data[i].amount+=n;
-    }else{
+    if(tambah) data[i].amount+=n;
+    else{
         data[i].amount-=n;
         if(data[i].amount<=0) data.splice(i,1);
     }
@@ -199,14 +222,14 @@ function ubah(i,tambah){
 }
 
 function hapus(i){
-    if(confirm("Hapus data?")){
+    if(confirm("Hapus data ini?")){
         data.splice(i,1);
         render();
     }
 }
 
 function resetSaldo(){
-    if(confirm("Reset semua data?")){
+    if(confirm("YAKIN reset semua saldo?")){
         data=[];
         render();
     }
