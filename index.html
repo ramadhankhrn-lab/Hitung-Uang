@@ -9,26 +9,26 @@
 :root{
   --glass: rgba(255,255,255,.15);
   --border: rgba(255,255,255,.35);
-  --text: #ffffff;
-  --green: #22c55e;
-  --red: #ef4444;
-  --orange: #f59e0b;
+  --text: #fff;
+  --green:#22c55e;
+  --red:#ef4444;
+  --orange:#f59e0b;
 }
 
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family: "Segoe UI", sans-serif;
+  font-family:Segoe UI,sans-serif;
   min-height:100vh;
   background:
-    linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-    url("https://files.catbox.moe/t234u7.jpg") center/cover no-repeat fixed;
+    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
+    url("https://files.catbox.moe/t234u7.jpg") center/cover fixed;
   color:var(--text);
   padding:20px;
 }
 
-h2{text-align:center;margin-bottom:25px}
+h2{text-align:center}
 
 .container{
   max-width:900px;
@@ -39,14 +39,11 @@ h2{text-align:center;margin-bottom:25px}
 
 .card{
   background:var(--glass);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter:blur(14px);
   border:1px solid var(--border);
   border-radius:18px;
   padding:18px;
 }
-
-.card h3{margin-top:0}
 
 input,button{
   width:100%;
@@ -54,8 +51,6 @@ input,button{
   margin-top:10px;
   border-radius:12px;
   border:none;
-  outline:none;
-  font-size:15px;
 }
 
 input{
@@ -63,16 +58,10 @@ input{
   color:#fff;
 }
 
-input::placeholder{color:#e5e7eb}
-
-button{
-  cursor:pointer;
-  font-weight:600;
-}
-
+button{font-weight:600;cursor:pointer}
 .btn-green{background:var(--green)}
-.btn-red{background:var(--red)}
 .btn-orange{background:var(--orange);color:#000}
+.btn-red{background:var(--red)}
 
 table{
   width:100%;
@@ -81,16 +70,21 @@ table{
   font-size:14px;
 }
 
-th,td{
+td{
   padding:8px;
   border-bottom:1px solid var(--border);
-  text-align:center;
 }
 
 .saldo{
-  font-size:28px;
+  font-size:26px;
   font-weight:bold;
   text-align:center;
+}
+
+.date{
+  margin-top:15px;
+  font-weight:bold;
+  opacity:.9;
 }
 </style>
 </head>
@@ -104,30 +98,19 @@ th,td{
 <h3>➕ Pemasukan</h3>
 <input id="produkMasuk" placeholder="Nama Produk">
 <input id="hargaMasuk" type="number" placeholder="Harga (Rp)">
-<button class="btn-green" onclick="tambahPemasukan()">Tambah Pemasukan</button>
-</div>
-
-<div class="card">
-<h3>📥 Daftar Pemasukan</h3>
-<table>
-<thead>
-<tr><th>Produk</th><th>Harga</th><th>Aksi</th></tr>
-</thead>
-<tbody id="listMasuk"></tbody>
-</table>
-Total Pemasukan: <b id="totalMasuk">Rp 0</b>
+<button class="btn-green" onclick="tambahPemasukan()">Tambah</button>
 </div>
 
 <div class="card">
 <h3>➖ Pengeluaran</h3>
 <input id="produkKeluar" placeholder="Nama Pengeluaran">
 <input id="hargaKeluar" type="number" placeholder="Harga (Rp)">
-<button class="btn-orange" onclick="tambahPengeluaran()">Tambah Pengeluaran</button>
+<button class="btn-orange" onclick="tambahPengeluaran()">Tambah</button>
 </div>
 
 <div class="card">
-<h3>📤 Total Pengeluaran</h3>
-<b id="totalKeluar">Rp 0</b>
+<h3>📜 History Per Hari</h3>
+<div id="history"></div>
 </div>
 
 <div class="card">
@@ -138,67 +121,74 @@ Total Pemasukan: <b id="totalMasuk">Rp 0</b>
 </div>
 
 <script>
-let pemasukan = JSON.parse(localStorage.getItem("pemasukan")) || [];
-let pengeluaran = JSON.parse(localStorage.getItem("pengeluaran")) || [];
+let data = JSON.parse(localStorage.getItem("keuangan")) || {};
 
+const today = new Date().toLocaleDateString("id-ID");
 const rupiah = n => "Rp " + n.toLocaleString("id-ID");
 
 function simpan(){
-localStorage.setItem("pemasukan",JSON.stringify(pemasukan));
-localStorage.setItem("pengeluaran",JSON.stringify(pengeluaran));
-}
-
-function render(){
-let tm=0, tk=0;
-listMasuk.innerHTML="";
-pemasukan.forEach((x,i)=>{
-tm+=x.harga;
-listMasuk.innerHTML+=`
-<tr>
-<td>${x.produk}</td>
-<td>${rupiah(x.harga)}</td>
-<td><button class="btn-red" onclick="hapusPemasukan(${i})">✖</button></td>
-</tr>`;
-});
-pengeluaran.forEach(x=>tk+=x.harga);
-totalMasuk.innerText=rupiah(tm);
-totalKeluar.innerText=rupiah(tk);
-saldo.innerText=rupiah(tm-tk);
+  localStorage.setItem("keuangan", JSON.stringify(data));
 }
 
 function tambahPemasukan(){
-let p=produkMasuk.value;
-let h=parseInt(hargaMasuk.value);
-if(!p||isNaN(h))return alert("Isi data!");
-pemasukan.push({produk:p,harga:h});
-simpan();render();
-produkMasuk.value="";hargaMasuk.value="";
+  tambahData("pemasukan", produkMasuk.value, hargaMasuk.value);
+  produkMasuk.value=""; hargaMasuk.value="";
 }
 
 function tambahPengeluaran(){
-let p=produkKeluar.value;
-let h=parseInt(hargaKeluar.value);
-if(!p||isNaN(h))return alert("Isi data!");
-pengeluaran.push({produk:p,harga:h});
-simpan();render();
-produkKeluar.value="";hargaKeluar.value="";
+  tambahData("pengeluaran", produkKeluar.value, hargaKeluar.value);
+  produkKeluar.value=""; hargaKeluar.value="";
 }
 
-function hapusPemasukan(i){
-if(confirm("Hapus pemasukan ini?")){
-pemasukan.splice(i,1);
-simpan();render();
+function tambahData(jenis, produk, harga){
+  harga = parseInt(harga);
+  if(!produk || isNaN(harga)) return alert("Isi data!");
+
+  if(!data[today]) data[today] = [];
+  data[today].push({jenis, produk, harga});
+  simpan(); render();
 }
+
+function render(){
+  let saldo = 0;
+  history.innerHTML = "";
+
+  Object.keys(data).forEach(tgl=>{
+    history.innerHTML += `<div class="date">📅 ${tgl}</div><table>`;
+    data[tgl].forEach((x,i)=>{
+      saldo += x.jenis === "pemasukan" ? x.harga : -x.harga;
+      history.innerHTML += `
+        <tr>
+          <td>${x.jenis==="pemasukan" ? "➕" : "➖"} ${x.produk}</td>
+          <td style="text-align:right">${rupiah(x.harga)}</td>
+          <td style="width:60px">
+            <button class="btn-red" onclick="hapus('${tgl}',${i})">✖</button>
+          </td>
+        </tr>`;
+    });
+    history.innerHTML += `</table>`;
+  });
+
+  saldoEl.innerText = rupiah(saldo);
+}
+
+function hapus(tgl,i){
+  if(confirm("Hapus data ini?")){
+    data[tgl].splice(i,1);
+    if(data[tgl].length===0) delete data[tgl];
+    simpan(); render();
+  }
 }
 
 function resetSaldo(){
-if(confirm("Reset semua data & saldo?")){
-localStorage.clear();
-pemasukan=[];pengeluaran=[];
-render();
-}
+  if(confirm("Reset semua data?")){
+    localStorage.clear();
+    data = {};
+    render();
+  }
 }
 
+const saldoEl = document.getElementById("saldo");
 render();
 </script>
 
