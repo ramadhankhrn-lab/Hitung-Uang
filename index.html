@@ -79,13 +79,22 @@ body{
     font-weight:bold;
 }
 
-/* LIST */
-.list{
+/* SECTION */
+.section{
     flex:1;
     overflow-y:auto;
     padding:10px;
 }
 
+.section h3{
+    margin:5px 0 10px;
+    font-size:16px;
+}
+
+.income-title{color:#7CFF9B}
+.expense-title{color:#FF9B9B}
+
+/* ITEM */
 .item{
     background:rgba(255,255,255,.1);
     padding:10px;
@@ -117,7 +126,7 @@ body{
 .minus{background:#dc3545;color:#fff}
 .delete{background:#555;color:#fff}
 
-/* RESET DI BAWAH */
+/* RESET */
 .reset{
     margin:10px;
     padding:12px;
@@ -149,15 +158,21 @@ body{
         <input id="amount" type="number" placeholder="Nominal">
     </div>
 
-    <!-- TOMBOL ATAS -->
     <div class="btn-group">
         <button class="btn-income" onclick="tambah('income')">+ Pemasukan</button>
         <button class="btn-expense" onclick="tambah('expense')">+ Pengeluaran</button>
     </div>
 
-    <div class="list" id="list"></div>
+    <!-- PEMASUKAN -->
+    <div class="section" id="incomeList">
+        <h3 class="income-title">⬆ PEMASUKAN</h3>
+    </div>
 
-    <!-- RESET BAWAH -->
+    <!-- PENGELUARAN -->
+    <div class="section" id="expenseList">
+        <h3 class="expense-title">⬇ PENGELUARAN</h3>
+    </div>
+
     <button class="reset" onclick="resetSaldo()">RESET SALDO</button>
 
     <div class="footer" id="saldo">Saldo: Rp 0</div>
@@ -167,9 +182,13 @@ body{
 let data=[];
 
 function render(){
-    const list=document.getElementById("list");
+    const incomeList=document.getElementById("incomeList");
+    const expenseList=document.getElementById("expenseList");
     const saldoEl=document.getElementById("saldo");
-    list.innerHTML="";
+
+    incomeList.innerHTML='<h3 class="income-title">⬆ PEMASUKAN</h3>';
+    expenseList.innerHTML='<h3 class="expense-title">⬇ PENGELUARAN</h3>';
+
     let saldo=0;
 
     data.forEach((d,i)=>{
@@ -188,7 +207,9 @@ function render(){
                 <button class="delete" onclick="hapus(${i})">✕</button>
             </div>
         `;
-        list.appendChild(div);
+
+        if(d.type==="income") incomeList.appendChild(div);
+        else expenseList.appendChild(div);
     });
 
     saldoEl.innerText="Saldo: Rp "+saldo.toLocaleString();
@@ -198,7 +219,7 @@ function tambah(type){
     const desc=document.getElementById("desc").value.trim();
     const amount=parseInt(document.getElementById("amount").value);
 
-    if(!desc || isNaN(amount) || amount<=0){
+    if(!desc||isNaN(amount)||amount<=0){
         alert("Isi data yang bener 😭");
         return;
     }
@@ -209,11 +230,11 @@ function tambah(type){
     render();
 }
 
-function ubah(i,tambah){
+function ubah(i,plus){
     const n=parseInt(prompt("Masukkan nominal:"));
     if(isNaN(n)||n<=0) return;
 
-    if(tambah) data[i].amount+=n;
+    if(plus) data[i].amount+=n;
     else{
         data[i].amount-=n;
         if(data[i].amount<=0) data.splice(i,1);
@@ -229,7 +250,7 @@ function hapus(i){
 }
 
 function resetSaldo(){
-    if(confirm("YAKIN reset semua saldo?")){
+    if(confirm("Yakin reset semua data?")){
         data=[];
         render();
     }
