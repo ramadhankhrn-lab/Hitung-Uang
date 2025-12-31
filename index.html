@@ -1,183 +1,205 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Catatan Keuangan</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Keuangan Modern</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
-        }
-        h2 { text-align: center; }
-        .box {
-            background: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 8px;
-            text-align: center;
-        }
-        .saldo {
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .reset {
-            background: red;
-            margin-top: 10px;
-        }
-    </style>
+<style>
+:root{
+  --glass: rgba(255,255,255,.15);
+  --border: rgba(255,255,255,.35);
+  --text: #ffffff;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f59e0b;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family: "Segoe UI", sans-serif;
+  min-height:100vh;
+  background:
+    linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+    url("https://files.catbox.moe/t234u7.jpg") center/cover no-repeat fixed;
+  color:var(--text);
+  padding:20px;
+}
+
+h2{text-align:center;margin-bottom:25px}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  display:grid;
+  gap:20px;
+}
+
+.card{
+  background:var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+}
+
+.card h3{margin-top:0}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:none;
+  outline:none;
+  font-size:15px;
+}
+
+input{
+  background:rgba(255,255,255,.25);
+  color:#fff;
+}
+
+input::placeholder{color:#e5e7eb}
+
+button{
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-green{background:var(--green)}
+.btn-red{background:var(--red)}
+.btn-orange{background:var(--orange);color:#000}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:14px;
+}
+
+th,td{
+  padding:8px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+
+.saldo{
+  font-size:28px;
+  font-weight:bold;
+  text-align:center;
+}
+</style>
 </head>
 <body>
 
-<h2>📊 Catatan Keuangan</h2>
+<h2>💰 Catatan Keuangan</h2>
 
-<div class="box">
-    <h3>➕ Pemasukan</h3>
-    <input type="text" id="produkMasuk" placeholder="Nama Produk">
-    <input type="number" id="hargaMasuk" placeholder="Harga (Rp)">
-    <button onclick="tambahPemasukan()">Tambah</button>
+<div class="container">
+
+<div class="card">
+<h3>➕ Pemasukan</h3>
+<input id="produkMasuk" placeholder="Nama Produk">
+<input id="hargaMasuk" type="number" placeholder="Harga (Rp)">
+<button class="btn-green" onclick="tambahPemasukan()">Tambah Pemasukan</button>
 </div>
 
-<div class="box">
-    <h3>➖ Pengeluaran</h3>
-    <input type="text" id="produkKeluar" placeholder="Nama Pengeluaran">
-    <input type="number" id="hargaKeluar" placeholder="Harga (Rp)">
-    <button onclick="tambahPengeluaran()">Tambah</button>
+<div class="card">
+<h3>📥 Daftar Pemasukan</h3>
+<table>
+<thead>
+<tr><th>Produk</th><th>Harga</th><th>Aksi</th></tr>
+</thead>
+<tbody id="listMasuk"></tbody>
+</table>
+Total Pemasukan: <b id="totalMasuk">Rp 0</b>
 </div>
 
-<div class="box">
-    <h3>📥 Pemasukan</h3>
-    <table>
-        <thead>
-            <tr><th>Produk</th><th>Harga</th></tr>
-        </thead>
-        <tbody id="listMasuk"></tbody>
-    </table>
-    Total: <span id="totalMasuk">Rp 0</span>
+<div class="card">
+<h3>➖ Pengeluaran</h3>
+<input id="produkKeluar" placeholder="Nama Pengeluaran">
+<input id="hargaKeluar" type="number" placeholder="Harga (Rp)">
+<button class="btn-orange" onclick="tambahPengeluaran()">Tambah Pengeluaran</button>
 </div>
 
-<div class="box">
-    <h3>📤 Pengeluaran</h3>
-    <table>
-        <thead>
-            <tr><th>Pengeluaran</th><th>Harga</th></tr>
-        </thead>
-        <tbody id="listKeluar"></tbody>
-    </table>
-    Total: <span id="totalKeluar">Rp 0</span>
+<div class="card">
+<h3>📤 Total Pengeluaran</h3>
+<b id="totalKeluar">Rp 0</b>
 </div>
 
-<div class="box">
-    <div class="saldo">
-        💰 Saldo: <span id="saldo">Rp 0</span>
-    </div>
-    <button class="reset" onclick="resetData()">Reset Semua Data</button>
+<div class="card">
+<div class="saldo">Saldo: <span id="saldo">Rp 0</span></div>
+<button class="btn-red" onclick="resetSaldo()">Reset Saldo</button>
+</div>
+
 </div>
 
 <script>
-    let totalMasuk = 0;
-    let totalKeluar = 0;
+let pemasukan = JSON.parse(localStorage.getItem("pemasukan")) || [];
+let pengeluaran = JSON.parse(localStorage.getItem("pengeluaran")) || [];
 
-    function formatRupiah(angka) {
-        return "Rp " + angka.toLocaleString("id-ID");
-    }
+const rupiah = n => "Rp " + n.toLocaleString("id-ID");
 
-    function simpanData() {
-        localStorage.setItem("totalMasuk", totalMasuk);
-        localStorage.setItem("totalKeluar", totalKeluar);
-        localStorage.setItem("listMasuk", document.getElementById("listMasuk").innerHTML);
-        localStorage.setItem("listKeluar", document.getElementById("listKeluar").innerHTML);
-    }
+function simpan(){
+localStorage.setItem("pemasukan",JSON.stringify(pemasukan));
+localStorage.setItem("pengeluaran",JSON.stringify(pengeluaran));
+}
 
-    function muatData() {
-        totalMasuk = parseInt(localStorage.getItem("totalMasuk")) || 0;
-        totalKeluar = parseInt(localStorage.getItem("totalKeluar")) || 0;
+function render(){
+let tm=0, tk=0;
+listMasuk.innerHTML="";
+pemasukan.forEach((x,i)=>{
+tm+=x.harga;
+listMasuk.innerHTML+=`
+<tr>
+<td>${x.produk}</td>
+<td>${rupiah(x.harga)}</td>
+<td><button class="btn-red" onclick="hapusPemasukan(${i})">✖</button></td>
+</tr>`;
+});
+pengeluaran.forEach(x=>tk+=x.harga);
+totalMasuk.innerText=rupiah(tm);
+totalKeluar.innerText=rupiah(tk);
+saldo.innerText=rupiah(tm-tk);
+}
 
-        document.getElementById("listMasuk").innerHTML = localStorage.getItem("listMasuk") || "";
-        document.getElementById("listKeluar").innerHTML = localStorage.getItem("listKeluar") || "";
+function tambahPemasukan(){
+let p=produkMasuk.value;
+let h=parseInt(hargaMasuk.value);
+if(!p||isNaN(h))return alert("Isi data!");
+pemasukan.push({produk:p,harga:h});
+simpan();render();
+produkMasuk.value="";hargaMasuk.value="";
+}
 
-        document.getElementById("totalMasuk").innerText = formatRupiah(totalMasuk);
-        document.getElementById("totalKeluar").innerText = formatRupiah(totalKeluar);
-        hitungSaldo();
-    }
+function tambahPengeluaran(){
+let p=produkKeluar.value;
+let h=parseInt(hargaKeluar.value);
+if(!p||isNaN(h))return alert("Isi data!");
+pengeluaran.push({produk:p,harga:h});
+simpan();render();
+produkKeluar.value="";hargaKeluar.value="";
+}
 
-    function tambahPemasukan() {
-        let produk = produkMasuk.value;
-        let harga = parseInt(hargaMasuk.value);
+function hapusPemasukan(i){
+if(confirm("Hapus pemasukan ini?")){
+pemasukan.splice(i,1);
+simpan();render();
+}
+}
 
-        if (!produk || isNaN(harga)) return alert("Isi data!");
+function resetSaldo(){
+if(confirm("Reset semua data & saldo?")){
+localStorage.clear();
+pemasukan=[];pengeluaran=[];
+render();
+}
+}
 
-        totalMasuk += harga;
-        listMasuk.innerHTML += `<tr><td>${produk}</td><td>${formatRupiah(harga)}</td></tr>`;
-        totalMasukEl = document.getElementById("totalMasuk");
-        totalMasukEl.innerText = formatRupiah(totalMasuk);
-
-        simpanData();
-        hitungSaldo();
-
-        produkMasuk.value = "";
-        hargaMasuk.value = "";
-    }
-
-    function tambahPengeluaran() {
-        let produk = produkKeluar.value;
-        let harga = parseInt(hargaKeluar.value);
-
-        if (!produk || isNaN(harga)) return alert("Isi data!");
-
-        totalKeluar += harga;
-        listKeluar.innerHTML += `<tr><td>${produk}</td><td>${formatRupiah(harga)}</td></tr>`;
-        document.getElementById("totalKeluar").innerText = formatRupiah(totalKeluar);
-
-        simpanData();
-        hitungSaldo();
-
-        produkKeluar.value = "";
-        hargaKeluar.value = "";
-    }
-
-    function hitungSaldo() {
-        document.getElementById("saldo").innerText =
-            formatRupiah(totalMasuk - totalKeluar);
-    }
-
-    function resetData() {
-        if (confirm("Yakin hapus semua data?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    // Load data saat web dibuka
-    muatData();
+render();
 </script>
 
 </body>
