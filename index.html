@@ -2,203 +2,204 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Catatan Keuangan</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catatan Keuangan Jualan</title>
 
 <style>
-:root{
-  --glass: rgba(255,255,255,.15);
-  --border: rgba(255,255,255,.35);
-  --text:#fff;
-  --green:#22c55e;
-  --orange:#f59e0b;
-  --red:#ef4444;
-}
-
-*{box-sizing:border-box}
-
 body{
-  margin:0;
-  font-family:Segoe UI,sans-serif;
-  min-height:100vh;
-  background:
-    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
-    url("https://files.catbox.moe/t234u7.jpg") center/cover fixed;
-  color:var(--text);
-  padding:20px;
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:url("https://files.catbox.moe/t234u7.jpg") no-repeat center;
+    background-size:cover;
+    color:#fff;
 }
-
-h2{text-align:center}
 
 .container{
-  max-width:900px;
-  margin:auto;
-  display:grid;
-  gap:20px;
+    max-width:600px;
+    margin:40px auto;
+    background:rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,.5);
 }
 
-.card{
-  background:var(--glass);
-  backdrop-filter:blur(14px);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:18px;
+h2{
+    text-align:center;
+    margin-bottom:20px;
 }
 
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
-  border:none;
+.form{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+input, select, button{
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    font-size:15px;
 }
 
 input{
-  background:rgba(255,255,255,.25);
-  color:#fff;
+    flex:1;
 }
 
-button{font-weight:600;cursor:pointer}
-.btn-green{background:var(--green)}
-.btn-orange{background:var(--orange);color:#000}
-.btn-red{background:var(--red)}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-  font-size:14px;
+select{
+    width:130px;
 }
 
-th,td{
-  padding:8px;
-  border-bottom:1px solid var(--border);
+button{
+    cursor:pointer;
+    font-weight:bold;
 }
 
-.date{
-  font-weight:bold;
-  margin-top:15px;
+.btn-add{
+    background:#28a745;
+    color:white;
 }
 
-.saldo{
-  font-size:26px;
-  font-weight:bold;
-  text-align:center;
+.btn-add:hover{
+    background:#218838;
+}
+
+.btn-reset{
+    width:100%;
+    margin-top:10px;
+    background:#ffc107;
+    color:#000;
+}
+
+.btn-reset:hover{
+    background:#e0a800;
+}
+
+.list{
+    margin-top:20px;
+}
+
+.item{
+    background:rgba(255,255,255,0.1);
+    padding:12px;
+    border-radius:6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+}
+
+.item.income{
+    border-left:4px solid #28a745;
+}
+
+.item.expense{
+    border-left:4px solid #dc3545;
+}
+
+.delete{
+    background:#dc3545;
+    color:white;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    text-align:center;
+    line-height:26px;
+    cursor:pointer;
+}
+
+.delete:hover{
+    background:#bd2130;
+}
+
+.balance{
+    margin-top:20px;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
-<h2>💰 Catatan Keuangan</h2>
-
 <div class="container">
+    <h2>💰 Catatan Keuangan Jualan</h2>
 
-<div class="card">
-<h3>➕ Pemasukan</h3>
-<input id="produkMasuk" placeholder="Nama Produk">
-<input id="hargaMasuk" type="number" placeholder="Harga (Rp)">
-<button class="btn-green" onclick="tambah('pemasukan')">Tambah</button>
-</div>
+    <div class="form">
+        <input type="text" id="desc" placeholder="Keterangan">
+        <input type="number" id="amount" placeholder="Nominal">
+        <select id="type">
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+        </select>
+        <button class="btn-add" onclick="addData()">Tambah</button>
+    </div>
 
-<div class="card">
-<h3>➖ Pengeluaran</h3>
-<input id="produkKeluar" placeholder="Nama Pengeluaran">
-<input id="hargaKeluar" type="number" placeholder="Harga (Rp)">
-<button class="btn-orange" onclick="tambah('pengeluaran')">Tambah</button>
-</div>
+    <button class="btn-reset" onclick="resetSaldo()">Reset Saldo</button>
 
-<div class="card">
-<h3>📜 History Per Hari</h3>
-<div id="history"></div>
-</div>
+    <div class="list" id="list"></div>
 
-<div class="card">
-<div class="saldo">Saldo: <span id="saldo">Rp 0</span></div>
-<button class="btn-red" onclick="resetSaldo()">Reset Saldo</button>
-</div>
-
+    <div class="balance" id="balance">Saldo: Rp 0</div>
 </div>
 
 <script>
-let keuangan = JSON.parse(localStorage.getItem("keuangan")) || {};
-
-const rupiah = n => "Rp " + n.toLocaleString("id-ID");
-
-function getToday(){
-  return new Date().toLocaleDateString("id-ID");
-}
-
-function simpan(){
-  localStorage.setItem("keuangan", JSON.stringify(keuangan));
-}
-
-function tambah(jenis){
-  const produk = jenis==="pemasukan" ? produkMasuk.value : produkKeluar.value;
-  const harga  = jenis==="pemasukan" ? hargaMasuk.value  : hargaKeluar.value;
-  const h = parseInt(harga);
-
-  if(!produk || isNaN(h)) return alert("Isi produk & harga!");
-
-  const tgl = getToday();
-  if(!keuangan[tgl]) keuangan[tgl] = [];
-
-  keuangan[tgl].push({ jenis, produk, harga:h });
-  simpan();
-  render();
-
-  if(jenis==="pemasukan"){
-    produkMasuk.value=""; hargaMasuk.value="";
-  }else{
-    produkKeluar.value=""; hargaKeluar.value="";
-  }
-}
+let data = [];
 
 function render(){
-  history.innerHTML="";
-  let saldo = 0;
+    const list = document.getElementById("list");
+    const balanceEl = document.getElementById("balance");
+    list.innerHTML = "";
+    let saldo = 0;
 
-  Object.keys(keuangan).forEach(tgl=>{
-    history.innerHTML += `
-      <div class="date">📅 ${tgl}</div>
-      <table>
-        <tr><th>Jenis</th><th>Produk</th><th>Harga</th><th>Aksi</th></tr>
-    `;
+    data.forEach((item, i)=>{
+        saldo += item.type === "income" ? item.amount : -item.amount;
 
-    keuangan[tgl].forEach((x,i)=>{
-      saldo += x.jenis==="pemasukan" ? x.harga : -x.harga;
-      history.innerHTML += `
-        <tr>
-          <td>${x.jenis==="pemasukan"?"➕":"➖"}</td>
-          <td>${x.produk}</td>
-          <td>${rupiah(x.harga)}</td>
-          <td><button class="btn-red" onclick="hapus('${tgl}',${i})">✖</button></td>
-        </tr>
-      `;
+        const div = document.createElement("div");
+        div.className = `item ${item.type}`;
+        div.innerHTML = `
+            <span>
+                ${item.desc} 
+                (${item.type === "income" ? "+" : "-"}Rp ${item.amount.toLocaleString()})
+            </span>
+            <div class="delete" onclick="hapus(${i})">×</div>
+        `;
+        list.appendChild(div);
     });
 
-    history.innerHTML += `</table>`;
-  });
-
-  saldoEl.innerText = rupiah(saldo);
+    balanceEl.innerText = "Saldo: Rp " + saldo.toLocaleString();
 }
 
-function hapus(tgl,i){
-  if(confirm("Hapus data ini?")){
-    keuangan[tgl].splice(i,1);
-    if(keuangan[tgl].length===0) delete keuangan[tgl];
-    simpan(); render();
-  }
+function addData(){
+    const desc = document.getElementById("desc").value.trim();
+    const amount = parseInt(document.getElementById("amount").value);
+    const type = document.getElementById("type").value;
+
+    if(!desc || isNaN(amount) || amount <= 0){
+        alert("Isi data yang bener woi 😭");
+        return;
+    }
+
+    data.push({desc, amount, type});
+    document.getElementById("desc").value = "";
+    document.getElementById("amount").value = "";
+    render();
+}
+
+function hapus(i){
+    if(confirm("Hapus data ini?")){
+        data.splice(i,1);
+        render();
+    }
 }
 
 function resetSaldo(){
-  if(confirm("Reset semua data?")){
-    localStorage.clear();
-    keuangan = {};
-    render();
-  }
+    if(confirm("Reset saldo? Semua data bakal kehapus!")){
+        data = [];
+        render();
+    }
 }
 
-const saldoEl = document.getElementById("saldo");
 render();
 </script>
 
